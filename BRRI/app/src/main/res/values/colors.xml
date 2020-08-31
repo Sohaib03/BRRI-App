@@ -7,4 +7,7 @@
     <color name="card_bg_color">#f6f6f6</color>
     <color name="title_text">#258bd6</color>
     <color name="content_text_color">#999da4</color>
+
+    <color name="sheet_header">#6200EE</color>
+    <color name="sheet_bg">#FFFFFF</color>
 </resources>

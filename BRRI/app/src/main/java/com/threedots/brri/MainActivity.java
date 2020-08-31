@@ -2,6 +2,7 @@ package com.threedots.brri;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -26,8 +27,10 @@ public class MainActivity extends AppCompatActivity {
 
         riceSpeciesList = new ArrayList<>();
         loadRiceSpecies();
-        for (int i=0; i<riceSpeciesList.size();i++)
-            Log.i(TAG, "onCreate: " + riceSpeciesList.get(i).name);
+
+        Intent listIntent = new Intent(this, ListActivity.class);
+        startActivity(listIntent);
+        finish();
 
 
     }
@@ -43,11 +46,11 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     String designation =  riceObj.getString("Designation");
                     String id = riceObj.getString("Acc No.");
-                    String submerganceScore = riceObj.getString("Submergence Score");
+                    String submergenceScore = riceObj.getString("Submergence Score");
                     if (id != null && designation != null && !designation.isEmpty()) {
                         RiceSpecies rice = new RiceSpecies(Integer.parseInt(id),designation);
-                        if (submerganceScore != null)
-                            rice.setSubmergenceScore(Integer.parseInt(submerganceScore));
+                        if (submergenceScore != null)
+                            rice.setSubmergenceScore(Integer.parseInt(submergenceScore));
 
                         riceSpeciesList.add(rice);
                     }
