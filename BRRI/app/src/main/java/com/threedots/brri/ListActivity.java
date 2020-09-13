@@ -3,6 +3,7 @@ package com.threedots.brri;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,8 +29,14 @@ public class ListActivity extends AppCompatActivity {
     ConstraintLayout playerSheet;
     BottomSheetBehavior bottomSheetBehavior;
     Menu topMenu;
-    Boolean reveresed = false;
+    Boolean reversed = false;
     TextView sortStatus;
+    Button sortBySubmergence;
+    Button sortById;
+    Toolbar mToolbar;
+
+
+    int sortedBy = RiceSpecies.ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,15 +57,11 @@ public class ListActivity extends AppCompatActivity {
 
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-        RangeBar rangeBar = findViewById(R.id.range_bar);
-        rangeBar.setTickCount(10);
-        rangeBar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
-            @Override
-            public void onIndexChangeListener(RangeBar rangeBar, int i, int i1) {
-                Log.i("TAG", "onIndexChangeListener: " + "Range " + i + " to " + i1);
-                myAdapter.filterRange(i, i1, RiceSpecies.SUBMERGENCE);
-            }
-        });
+        mToolbar = findViewById(R.id.main_toolbar);
+        setSupportActionBar(mToolbar);
+
+        initSliderRangeBar();
+
 
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -75,12 +78,28 @@ public class ListActivity extends AppCompatActivity {
             }
         });
 
-        Button sortBySubmergence = findViewById(R.id.sort_by_submergence);
+        sortBySubmergence = findViewById(R.id.sort_by_submergence);
         sortBySubmergence.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myAdapter.sortBySubmergence(reveresed);
+                //myAdapter.sortBySubmergence(reversed);
+                myAdapter.sortBy(RiceSpecies.SUBMERGENCE, reversed);
                 sortStatus.setText("Sorted by: Submergence");
+                resetButtonColor();
+                sortedBy = RiceSpecies.SUBMERGENCE;
+                sortBySubmergence.setBackground(getDrawable(R.drawable.selected_button_style));
+            }
+        });
+
+        sortById = findViewById(R.id.sort_by_id);
+        sortById.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myAdapter.sortBy(RiceSpecies.ID, reversed);
+                sortStatus.setText("Sorted by: ID");
+                sortedBy = RiceSpecies.ID;
+                resetButtonColor();
+                sortById.setBackground(getDrawable(R.drawable.selected_button_style));
             }
         });
 
@@ -88,14 +107,37 @@ public class ListActivity extends AppCompatActivity {
         orderSwitch.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
-                reveresed = isChecked;
+                reversed = isChecked;
                 myAdapter.reverse();
             }
         });
     }
 
+    private void initSliderRangeBar() {
+        RangeBar rangeBar = findViewById(R.id.range_bar);
+        rangeBar.setTickCount(10);
+        rangeBar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
+            @Override
+            public void onIndexChangeListener(RangeBar rangeBar, int i, int i1) {
+                Log.i("TAG", "onIndexChangeListener: " + "Range " + i + " to " + i1);
+                myAdapter.filterRange(i, i1, sortedBy);
+                sortBySorted();
+            }
+        });
+    }
+
+    private void sortBySorted() {
+        myAdapter.sortBy(sortedBy, reversed);
+    }
+
+    public void resetButtonColor() {
+        sortById.setBackground(getDrawable(R.drawable.unselected_button_style));
+        sortBySubmergence.setBackground(getDrawable(R.drawable.unselected_button_style));
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.main_menu, menu);
         topMenu = menu;
         MenuItem item = menu.findItem(R.id.action_search);
@@ -125,6 +167,6 @@ public class ListActivity extends AppCompatActivity {
                 return false;
             }
         });
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 }

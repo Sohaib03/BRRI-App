@@ -1,6 +1,7 @@
 package com.threedots.brri;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +50,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
         if (rice.submergenceScore == -1) holder.submergenceScoreText.setText("N/A");
         else holder.submergenceScoreText.setText(String.valueOf(rice.submergenceScore));
+
+        if (rice.coldToleranceScore == -1) holder.coldToleranceScoreText.setText("N/A");
+        else holder.coldToleranceScoreText.setText(String.valueOf(rice.coldToleranceScore));
+
+        if (rice.droughtScore == -1) holder.droughtScoreText.setText("N/A");
+        else holder.droughtScoreText.setText(String.valueOf(rice.droughtScore));
+
+
 
     }
 
@@ -123,23 +134,82 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
             }
         };
 
-
-
         if (reversed) Collections.sort(riceSpeciesList, reverseComparator);
         else Collections.sort(riceSpeciesList, comparator);
         notifyDataSetChanged();
 
     }
 
+    public void sortBy(final int idx, boolean reversed) {
+
+        for (int i=0; i<riceSpeciesList.size(); i++)
+            if (riceSpeciesList.get(i).get(idx) == -1)
+                riceSpeciesList.remove(i);
+
+        Comparator<RiceSpecies> comparator = new Comparator<RiceSpecies>() {
+            @Override
+            public int compare(RiceSpecies o1, RiceSpecies o2) {
+                if (o1.get(idx) == o2.get(idx)) return o1.name.compareTo(o2.name);
+                else if (o1.get(idx) < o2.get(idx)) return -1;
+                else return 1;
+            }
+        };
+        Comparator<RiceSpecies> reverseComparator = new Comparator<RiceSpecies>() {
+            @Override
+            public int compare(RiceSpecies o1, RiceSpecies o2) {
+                if (o1.get(idx) == o2.get(idx)) return o1.name.compareTo(o2.name);
+                else if (o1.get(idx) < o2.get(idx)) return 1;
+                else return -1;
+            }
+        };
+
+        if (reversed) Collections.sort(riceSpeciesList, reverseComparator);
+        else Collections.sort(riceSpeciesList, comparator);
+
+
+
+        notifyDataSetChanged();
+
+    }
+
+    /*
+    Sorting by ID of the Species.
+     */
+    public void sortById(boolean reversed) {
+        Comparator<RiceSpecies> comparator = new Comparator<RiceSpecies>() {
+            @Override
+            public int compare(RiceSpecies o1, RiceSpecies o2) {
+                if (o1.id == o2.id) return o1.name.compareTo(o2.name);
+                else if (o1.id < o2.id) return -1;
+                else return 1;
+            }
+        };
+        Comparator<RiceSpecies> reverseComparator = new Comparator<RiceSpecies>() {
+            @Override
+            public int compare(RiceSpecies o1, RiceSpecies o2) {
+                if (o1.id == o2.id) return o1.name.compareTo(o2.name);
+                else if (o1.id < o2.id) return 1;
+                else return -1;
+            }
+        };
+
+        if (reversed) Collections.sort(riceSpeciesList, reverseComparator);
+        else Collections.sort(riceSpeciesList, comparator);
+        notifyDataSetChanged();
+    }
+
     public void filterRange(int lo, int hi, int factor) {
+        Log.i("Filtering by", "filterRange: " + factor);
+        if (factor == RiceSpecies.ID || factor == RiceSpecies.NAME) return;
+
         List<RiceSpecies> filteredList = new ArrayList<>();
-        if (factor == RiceSpecies.SUBMERGENCE) {
-            for(RiceSpecies rice: riceSpeciesListAll) {
-                if (rice.submergenceScore>=lo && rice.submergenceScore<=hi) {
-                    filteredList.add(rice);
-                }
+
+        for(RiceSpecies rice: riceSpeciesListAll) {
+            if (rice.get(factor)>=lo && rice.get(factor)<=hi) {
+                filteredList.add(rice);
             }
         }
+
         riceSpeciesList.clear();
         riceSpeciesList.addAll(filteredList);
         notifyDataSetChanged();
@@ -154,12 +224,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
         TextView titleText;
         TextView salinityScoreText;
         TextView submergenceScoreText;
+        TextView coldToleranceScoreText;
+        TextView droughtScoreText;
         TextView cardId;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.item_card_title);
             salinityScoreText = itemView.findViewById(R.id.card_salinity_score);
             submergenceScoreText = itemView.findViewById(R.id.card_submergence_score);
+            coldToleranceScoreText = itemView.findViewById(R.id.card_cold_score);
+            droughtScoreText = itemView.findViewById(R.id.card_drought_score);
             cardId = itemView.findViewById(R.id.card_id_text);
         }
     }
