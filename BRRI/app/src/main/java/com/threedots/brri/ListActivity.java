@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -22,7 +23,7 @@ import com.suke.widget.SwitchButton;
 
 import java.util.List;
 
-public class ListActivity extends AppCompatActivity {
+public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceClickListener {
     RecyclerView recyclerView;
     MyAdapter myAdapter;
     List<RiceSpecies> riceSpeciesList;
@@ -33,6 +34,9 @@ public class ListActivity extends AppCompatActivity {
     TextView sortStatus;
     Button sortBySubmergence;
     Button sortById;
+    Button sortBySalinity;
+    Button sortByCold;
+    Button sortByDrought;
     Toolbar mToolbar;
 
 
@@ -47,7 +51,7 @@ public class ListActivity extends AppCompatActivity {
         sortStatus = findViewById(R.id.sheet_sort_status);
 
         recyclerView = findViewById(R.id.recyclerView);
-        myAdapter = new MyAdapter(this, riceSpeciesList);
+        myAdapter = new MyAdapter(this, riceSpeciesList, this);
 
         recyclerView.setAdapter(myAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -78,20 +82,42 @@ public class ListActivity extends AppCompatActivity {
             }
         });
 
+        initializeButtons();
+
+        initializeButtonClickProperty();
+
+        SwitchButton orderSwitch = findViewById(R.id.switchButton);
+        orderSwitch.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                reversed = isChecked;
+                myAdapter.reverse();
+            }
+        });
+    }
+    private void initializeButtons() {
+        sortByDrought = findViewById(R.id.sort_by_drought);
+        sortByCold = findViewById(R.id.sort_by_cold);
+        sortBySalinity = findViewById(R.id.sort_by_salinity);
+        sortById = findViewById(R.id.sort_by_id);
         sortBySubmergence = findViewById(R.id.sort_by_submergence);
+    }
+
+    private void initializeButtonClickProperty() {
+
         sortBySubmergence.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //myAdapter.sortBySubmergence(reversed);
+                myAdapter.filterRange(0, 10, RiceSpecies.SUBMERGENCE);
                 myAdapter.sortBy(RiceSpecies.SUBMERGENCE, reversed);
                 sortStatus.setText("Sorted by: Submergence");
                 resetButtonColor();
                 sortedBy = RiceSpecies.SUBMERGENCE;
                 sortBySubmergence.setBackground(getDrawable(R.drawable.selected_button_style));
+
             }
         });
 
-        sortById = findViewById(R.id.sort_by_id);
         sortById.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,12 +129,42 @@ public class ListActivity extends AppCompatActivity {
             }
         });
 
-        SwitchButton orderSwitch = findViewById(R.id.switchButton);
-        orderSwitch.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+        sortBySalinity.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
-                reversed = isChecked;
-                myAdapter.reverse();
+            public void onClick(View v) {
+                myAdapter.filterRange(0, 10, RiceSpecies.SALINITY);
+                myAdapter.sortBy(RiceSpecies.SALINITY, reversed);
+                sortStatus.setText("Sorted by: Salinity");
+                sortedBy = RiceSpecies.SALINITY;
+                resetButtonColor();
+                sortBySalinity.setBackground(getDrawable(R.drawable.selected_button_style));
+            }
+        });
+
+        sortByCold.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myAdapter.filterRange(0, 10, RiceSpecies.COLD_TOLERANCE);
+
+                myAdapter.sortBy(RiceSpecies.COLD_TOLERANCE, reversed);
+                sortStatus.setText("Sorted by: Cold");
+                sortedBy = RiceSpecies.COLD_TOLERANCE;
+                resetButtonColor();
+                sortByCold.setBackground(getDrawable(R.drawable.selected_button_style));
+            }
+        });
+
+
+        sortByDrought.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myAdapter.filterRange(0, 10, RiceSpecies.DROUGHT);
+
+                myAdapter.sortBy(RiceSpecies.DROUGHT, reversed);
+                sortStatus.setText("Sorted by: Drought");
+                sortedBy = RiceSpecies.DROUGHT;
+                resetButtonColor();
+                sortByDrought.setBackground(getDrawable(R.drawable.selected_button_style));
             }
         });
     }
@@ -133,6 +189,9 @@ public class ListActivity extends AppCompatActivity {
     public void resetButtonColor() {
         sortById.setBackground(getDrawable(R.drawable.unselected_button_style));
         sortBySubmergence.setBackground(getDrawable(R.drawable.unselected_button_style));
+        sortByDrought.setBackground(getDrawable(R.drawable.unselected_button_style));
+        sortByCold.setBackground(getDrawable(R.drawable.unselected_button_style));
+        sortBySalinity.setBackground(getDrawable(R.drawable.unselected_button_style));
     }
 
     @Override
@@ -168,5 +227,12 @@ public class ListActivity extends AppCompatActivity {
             }
         });
         return true;
+    }
+
+    @Override
+    public void onRiceClick( RiceSpecies riceSpecies) {
+        Intent intent = new Intent(this, RiceDetails.class);
+        intent.putExtra("Rice", riceSpecies);
+        startActivity(intent);
     }
 }

@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(listIntent);
         finish();
 
-
     }
 
     public void loadRiceSpecies() {
@@ -54,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     String designation =  riceObj.getString("Designation");
                     String id = riceObj.getString("Acc No.");
-                    Log.i(TAG, "loadRiceSpecies: "  + "FOUND " + id + " -- " + designation);
+                    //Log.i(TAG, "loadRiceSpecies: "  + "FOUND " + id + " -- " + designation);
                     if ( designation != null && !designation.isEmpty()) {
 
                         RiceSpecies rice = new RiceSpecies(Integer.parseInt(id),designation);
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                             rice.coldToleranceScore = Integer.parseInt(riceObj.getString("Cold tolerance score"));
                         if (riceObj.has("Drought score"))
                             rice.droughtScore = Integer.parseInt(riceObj.getString("Drought score"));
-                        Log.i(TAG, "loadRiceSpecies: "  + "FOUND " + id + " -- " + designation);
+                        //Log.i(TAG, "loadRiceSpecies: "  + "FOUND " + id + " -- " + designation);
                         if (riceObj.has("Salinity  Score"))
                             rice.salinityScore = (int) Float.parseFloat(riceObj.getString("Salinity  Score"));
 

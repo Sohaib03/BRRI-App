@@ -1,6 +1,8 @@
 package com.threedots.brri;
 
-public class RiceSpecies {
+import java.io.Serializable;
+
+public class RiceSpecies implements Serializable {
     String name;
     int id;
     int salinityScore;

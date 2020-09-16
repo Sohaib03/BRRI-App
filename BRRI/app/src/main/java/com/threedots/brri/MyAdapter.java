@@ -25,10 +25,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
     List<RiceSpecies> riceSpeciesList;
     List<RiceSpecies> riceSpeciesListAll;
     Context context;
-    public MyAdapter(Context context, List<RiceSpecies> riceSpeciesList) {
+    private OnRiceClickListener onRiceClickListener;
+    public MyAdapter(Context context, List<RiceSpecies> riceSpeciesList, OnRiceClickListener onRiceClickListener) {
         this.context = context;
         this.riceSpeciesList = riceSpeciesList;
         this.riceSpeciesListAll = new ArrayList<>(riceSpeciesList);
+        this.onRiceClickListener = onRiceClickListener;
     }
 
     @NonNull
@@ -36,7 +38,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.item_card, parent, false);
-        return new MyViewHolder(view);
+        return new MyViewHolder(view, onRiceClickListener);
     }
 
     @Override
@@ -56,8 +58,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
         if (rice.droughtScore == -1) holder.droughtScoreText.setText("N/A");
         else holder.droughtScoreText.setText(String.valueOf(rice.droughtScore));
-
-
 
     }
 
@@ -115,30 +115,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
         return filter;
     }
 
-    public void sortBySubmergence(boolean reversed) {
 
-        Comparator<RiceSpecies> comparator = new Comparator<RiceSpecies>() {
-            @Override
-            public int compare(RiceSpecies o1, RiceSpecies o2) {
-                if (o1.submergenceScore == o2.submergenceScore) return o1.name.compareTo(o2.name);
-                else if (o1.submergenceScore < o2.submergenceScore) return -1;
-                else return 1;
-            }
-        };
-        Comparator<RiceSpecies> reverseComparator = new Comparator<RiceSpecies>() {
-            @Override
-            public int compare(RiceSpecies o1, RiceSpecies o2) {
-                if (o1.submergenceScore == o2.submergenceScore) return o1.name.compareTo(o2.name);
-                else if (o1.submergenceScore < o2.submergenceScore) return 1;
-                else return -1;
-            }
-        };
-
-        if (reversed) Collections.sort(riceSpeciesList, reverseComparator);
-        else Collections.sort(riceSpeciesList, comparator);
-        notifyDataSetChanged();
-
-    }
 
     public void sortBy(final int idx, boolean reversed) {
 
@@ -172,31 +149,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
 
     }
 
-    /*
-    Sorting by ID of the Species.
-     */
-    public void sortById(boolean reversed) {
-        Comparator<RiceSpecies> comparator = new Comparator<RiceSpecies>() {
-            @Override
-            public int compare(RiceSpecies o1, RiceSpecies o2) {
-                if (o1.id == o2.id) return o1.name.compareTo(o2.name);
-                else if (o1.id < o2.id) return -1;
-                else return 1;
-            }
-        };
-        Comparator<RiceSpecies> reverseComparator = new Comparator<RiceSpecies>() {
-            @Override
-            public int compare(RiceSpecies o1, RiceSpecies o2) {
-                if (o1.id == o2.id) return o1.name.compareTo(o2.name);
-                else if (o1.id < o2.id) return 1;
-                else return -1;
-            }
-        };
-
-        if (reversed) Collections.sort(riceSpeciesList, reverseComparator);
-        else Collections.sort(riceSpeciesList, comparator);
-        notifyDataSetChanged();
-    }
 
     public void filterRange(int lo, int hi, int factor) {
         Log.i("Filtering by", "filterRange: " + factor);
@@ -220,14 +172,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
         notifyDataSetChanged();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         TextView titleText;
         TextView salinityScoreText;
         TextView submergenceScoreText;
         TextView coldToleranceScoreText;
         TextView droughtScoreText;
         TextView cardId;
-        public MyViewHolder(@NonNull View itemView) {
+        OnRiceClickListener onRiceClickListener;
+
+
+        public MyViewHolder(@NonNull View itemView, OnRiceClickListener onRiceClickListener) {
             super(itemView);
             titleText = itemView.findViewById(R.id.item_card_title);
             salinityScoreText = itemView.findViewById(R.id.card_salinity_score);
@@ -235,6 +190,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> impl
             coldToleranceScoreText = itemView.findViewById(R.id.card_cold_score);
             droughtScoreText = itemView.findViewById(R.id.card_drought_score);
             cardId = itemView.findViewById(R.id.card_id_text);
+
+            itemView.setOnClickListener(this);
+            this.onRiceClickListener = onRiceClickListener;
         }
+
+        @Override
+        public void onClick(View v) {
+            onRiceClickListener.onRiceClick(riceSpeciesList.get(getAdapterPosition()));
+        }
+    }
+
+    public interface OnRiceClickListener {
+        void onRiceClick (RiceSpecies riceSpecies);
     }
 }
