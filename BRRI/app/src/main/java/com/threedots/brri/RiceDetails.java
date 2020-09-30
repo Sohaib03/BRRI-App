@@ -63,9 +63,9 @@ public class RiceDetails extends AppCompatActivity {
         tabLayout = findViewById(R.id.tab_layout);
         viewPager = findViewById(R.id.view_pager);
         tabLayout.setupWithViewPager(viewPager);
-        lineChartFragment = new LineChartFragment();
+        lineChartFragment = new LineChartFragment(rice);
         barPlotFragment = new BarPlotFragment();
-        pieChartFragment = new PieChartFragment();
+        pieChartFragment = new PieChartFragment(rice);
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(lineChartFragment, "Line Chart");

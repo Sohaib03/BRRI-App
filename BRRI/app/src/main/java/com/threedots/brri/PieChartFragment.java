@@ -20,9 +20,11 @@ import java.util.List;
 
 public class PieChartFragment extends Fragment {
 
+    RiceSpecies riceSpecies;
 
-    public PieChartFragment() {
+    public PieChartFragment(RiceSpecies riceSpecies) {
         // Required empty public constructor
+        this.riceSpecies = riceSpecies;
     }
 
 
@@ -39,21 +41,28 @@ public class PieChartFragment extends Fragment {
         PieChart chart = view.findViewById(R.id.pie_chart);
 
         List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(5, "A"));
-        entries.add(new PieEntry(7, "B"));
-        entries.add(new PieEntry(8, "C"));
-        entries.add(new PieEntry(2, "D"));
-        entries.add(new PieEntry(5, "E"));
+        if (riceSpecies.coldToleranceScore != -1) {
+            entries.add(new PieEntry(riceSpecies.coldToleranceScore, "Cold Tolerance"));
+        }
+        if (riceSpecies.submergenceScore != -1) {
+            entries.add(new PieEntry(riceSpecies.submergenceScore, "Submergence"));
+        }
+        if (riceSpecies.droughtScore != -1) {
+            entries.add(new PieEntry(riceSpecies.droughtScore, "Drought Tolerance"));
+        }
+        if (riceSpecies.salinityScore != -1) {
+            entries.add(new PieEntry(riceSpecies.salinityScore, "Salinity Tolerance"));
+        }
 
         ArrayList<Integer> colors = new ArrayList<>();
 
-        for (int c : ColorTemplate.VORDIPLOM_COLORS)
+        for (int c : ColorTemplate.MATERIAL_COLORS)
             colors.add(c);
 
         colors.add(ColorTemplate.getHoloBlue());
 
 
-        PieDataSet pieDataSet = new PieDataSet(entries, "Dataset Label");
+        PieDataSet pieDataSet = new PieDataSet(entries, "Rice Species Score");
         pieDataSet.setColors(colors);
         PieData pieData = new PieData(pieDataSet);
         chart.setData(pieData);

@@ -3,6 +3,7 @@ package com.threedots.brri;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +22,9 @@ public class LoginActivity extends AppCompatActivity {
 
     String TAG = "LoginActivity";
     public static String data = "";
+    public static String SHARED_PREFS = "shared_prefs";
+    public static String DATA = "data";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +34,13 @@ public class LoginActivity extends AppCompatActivity {
         final TextInputLayout passwordLayout = findViewById(R.id.password_text_input);
         final TextInputEditText passwordTextInput = findViewById(R.id.password_edit_text);
         final Button nextButton = findViewById(R.id.next_button);
+        loadData();
+        if (data != "") {
+            Log.i(TAG, "onCreate: " + "Found data");
+            Intent mainIntent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(mainIntent);
+            finish();
+        }
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,12 +55,27 @@ public class LoginActivity extends AppCompatActivity {
                     Log.i(TAG, "onClick: " + "correct password");
                     passwordLayout.setError(null);
                     data = output;
+                    saveData();
                     Intent mainIntent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(mainIntent);
                     finish();
                 }
             }
         });
+
+
+    }
+    public void saveData() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Log.i(TAG, "saveData: " + "Data Saved");
+        editor.putString(DATA, data);
+        editor.apply();
+    }
+
+    public void loadData() {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+        data = sharedPreferences.getString(DATA, "");
     }
 
     public String getDecryptedString(String key) {

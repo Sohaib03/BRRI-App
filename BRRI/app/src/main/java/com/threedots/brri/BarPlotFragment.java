@@ -7,17 +7,21 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BarPlotFragment extends Fragment {
 
+    BarChart chart;
 
     public BarPlotFragment() {
         // Required empty public constructor
@@ -34,23 +38,39 @@ public class BarPlotFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_bar_plot, container, false);
-        BarChart chart = view.findViewById(R.id.bar_chart);
+        chart = view.findViewById(R.id.bar_chart);
 
+        setupChart(0);
+        Spinner dropdown = view.findViewById(R.id.bar_chart_spinner);
+        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setupChart(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        return view;
+    }
+
+    private void setupChart(int j) {
         List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(1, 3));
-        entries.add(new BarEntry(2, 5));
-        entries.add(new BarEntry(3, 7));
-        entries.add(new BarEntry(4, 3));
-        entries.add(new BarEntry(5, 5));
-        entries.add(new BarEntry(6, 1));
-        entries.add(new BarEntry(7, 9));
+        for (int i=0; i<11; i++) {
+            if (ListActivity.Scores[j][i] != 0) {
+                entries.add(new BarEntry(i, ListActivity.Scores[j][i]));
+            }
+        }
+        chart.setHighlightPerTapEnabled(false);
+        chart.setPinchZoom(true);
 
         BarDataSet dataSet = new BarDataSet(entries, "Data Label");
 
         BarData barData = new BarData(dataSet);
         chart.setData(barData);
         chart.invalidate();
-
-        return view;
     }
 }

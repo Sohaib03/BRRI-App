@@ -5,9 +5,12 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -21,10 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LineChartFragment extends Fragment {
-
-
-    public LineChartFragment() {
+    LineChart chart;
+    RiceSpecies riceSpecies;
+    public LineChartFragment(RiceSpecies riceSpecies) {
         // Required empty public constructor
+        this.riceSpecies = riceSpecies;
     }
 
 
@@ -39,7 +43,7 @@ public class LineChartFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view =  inflater.inflate(R.layout.fragment_line_chart, container, false);
-        LineChart chart = view.findViewById(R.id.line_chart);
+        chart = view.findViewById(R.id.line_chart);
         chart.setViewPortOffsets(0, 0, 0, 0);
         chart.setBackgroundColor(Color.rgb(104, 241, 175));
 
@@ -54,14 +58,34 @@ public class LineChartFragment extends Fragment {
         y.setAxisLineColor(Color.WHITE);
 
 
+        createChart(0);
+
+        Spinner spinner = view.findViewById(R.id.line_frag_spinner);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.i("TAG", "onItemSelected: " + position);
+                createChart(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        return view;
+    }
+
+    public void createChart(int j) {
         List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(1, 5));
-        entries.add(new Entry(2, 7));
-        entries.add(new Entry(3, 8));
-        entries.add(new Entry(4, 6));
-        entries.add(new Entry(5, 4));
-        
-        
+        for (int i=0; i<11; i++) {
+            if (ListActivity.Scores[j][i] != 0) {
+                entries.add(new Entry(i, ListActivity.Scores[j][i]));
+            }
+        }
+
+
         LineDataSet dataSet = new LineDataSet(entries, "Dataset");
         dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         dataSet.setCubicIntensity(0.2f);
@@ -74,12 +98,10 @@ public class LineChartFragment extends Fragment {
         dataSet.setColor(Color.WHITE);
         dataSet.setFillColor(Color.WHITE);
         dataSet.setFillAlpha(100);
-        
-        
+
+
         LineData lineData = new LineData(dataSet);
         chart.setData(lineData);
         chart.invalidate();
-
-        return view;
     }
 }

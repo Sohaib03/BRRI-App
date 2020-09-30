@@ -3,6 +3,7 @@ package com.threedots.brri;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.animation.AlphaAnimation;
@@ -10,6 +11,8 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 
 public class SplashscreenActivity extends AppCompatActivity {
+
+    private static final String TAG = "Splash";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,9 @@ public class SplashscreenActivity extends AppCompatActivity {
             public void onAnimationRepeat(Animation animation) {}
         });
 
+
+
         logoImage.startAnimation(animation);
     }
+
 }

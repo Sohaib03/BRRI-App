@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.edmodo.rangebar.RangeBar;
+import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.suke.widget.SwitchButton;
 
@@ -39,8 +40,12 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
     Button sortByDrought;
     Toolbar mToolbar;
 
+    public static int[][] Scores = new int[4][11];
 
     int sortedBy = RiceSpecies.ID;
+    public static boolean show_na = false;
+    int low = 0, high = 10;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,8 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
         mToolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(mToolbar);
 
+        initScores();
+
         initSliderRangeBar();
 
 
@@ -73,9 +80,11 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
                 MenuItem opener = topMenu.findItem(R.id.action_open_bottom_sheet);
 
 
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) opener.setIcon(R.drawable.ic_baseline_keyboard_arrow_down_24);
+                if (newState == BottomSheetBehavior.STATE_EXPANDED)
+                    opener.setIcon(R.drawable.ic_baseline_keyboard_arrow_down_24);
                 else opener.setIcon(R.drawable.ic_baseline_keyboard_arrow_up_24);
             }
+
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
 
@@ -94,7 +103,34 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
                 myAdapter.reverse();
             }
         });
+
+        SwitchButton showNaSwitch = findViewById(R.id.show_na_switch);
+        showNaSwitch.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                show_na = !show_na;
+                sortBySorted();
+            }
+        });
     }
+
+    private void initScores() {
+        for (RiceSpecies riceSpecies : riceSpeciesList) {
+            if (riceSpecies.coldToleranceScore != -1) {
+                Scores[3][riceSpecies.coldToleranceScore]++;
+            }
+            if (riceSpecies.submergenceScore != -1) {
+                Scores[0][riceSpecies.submergenceScore]++;
+            }
+            if (riceSpecies.droughtScore != -1) {
+                Scores[2][riceSpecies.droughtScore]++;
+            }
+            if (riceSpecies.salinityScore != -1) {
+                Scores[1][riceSpecies.salinityScore]++;
+            }
+        }
+    }
+
     private void initializeButtons() {
         sortByDrought = findViewById(R.id.sort_by_drought);
         sortByCold = findViewById(R.id.sort_by_cold);
@@ -103,24 +139,21 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
         sortBySubmergence = findViewById(R.id.sort_by_submergence);
     }
 
+
+
     private void initializeButtonClickProperty() {
 
         sortBySubmergence.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myAdapter.filterRange(0, 10, RiceSpecies.SUBMERGENCE);
-                myAdapter.sortBy(RiceSpecies.SUBMERGENCE, reversed);
-                sortStatus.setText("Sorted by: Submergence");
-                resetButtonColor();
-                sortedBy = RiceSpecies.SUBMERGENCE;
-                sortBySubmergence.setBackground(getDrawable(R.drawable.selected_button_style));
-
+                submergenceSort();
             }
         });
 
         sortById.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                myAdapter.filterRange(-2, 10, RiceSpecies.SUBMERGENCE );
                 myAdapter.sortBy(RiceSpecies.ID, reversed);
                 sortStatus.setText("Sorted by: ID");
                 sortedBy = RiceSpecies.ID;
@@ -132,25 +165,14 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
         sortBySalinity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myAdapter.filterRange(0, 10, RiceSpecies.SALINITY);
-                myAdapter.sortBy(RiceSpecies.SALINITY, reversed);
-                sortStatus.setText("Sorted by: Salinity");
-                sortedBy = RiceSpecies.SALINITY;
-                resetButtonColor();
-                sortBySalinity.setBackground(getDrawable(R.drawable.selected_button_style));
+                salinitySort();
             }
         });
 
         sortByCold.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myAdapter.filterRange(0, 10, RiceSpecies.COLD_TOLERANCE);
-
-                myAdapter.sortBy(RiceSpecies.COLD_TOLERANCE, reversed);
-                sortStatus.setText("Sorted by: Cold");
-                sortedBy = RiceSpecies.COLD_TOLERANCE;
-                resetButtonColor();
-                sortByCold.setBackground(getDrawable(R.drawable.selected_button_style));
+                coldSort();
             }
         });
 
@@ -158,24 +180,67 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
         sortByDrought.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                myAdapter.filterRange(0, 10, RiceSpecies.DROUGHT);
-
-                myAdapter.sortBy(RiceSpecies.DROUGHT, reversed);
-                sortStatus.setText("Sorted by: Drought");
-                sortedBy = RiceSpecies.DROUGHT;
-                resetButtonColor();
-                sortByDrought.setBackground(getDrawable(R.drawable.selected_button_style));
+                droughtSort();
             }
         });
+    }
+    private void droughtSort() {
+        if (!show_na)
+            myAdapter.filterRange(0, 10, RiceSpecies.DROUGHT);
+        else
+            myAdapter.filterRange(-2, 10, RiceSpecies.DROUGHT);
+
+        myAdapter.sortBy(RiceSpecies.DROUGHT, reversed);
+        sortStatus.setText("Sorted by: Drought");
+        sortedBy = RiceSpecies.DROUGHT;
+        resetButtonColor();
+        sortByDrought.setBackground(getDrawable(R.drawable.selected_button_style));
+    }
+    private void coldSort() {
+        if (!show_na)
+            myAdapter.filterRange(0, 10, RiceSpecies.COLD_TOLERANCE);
+        else
+            myAdapter.filterRange(-2, 10, RiceSpecies.COLD_TOLERANCE);
+
+
+        myAdapter.sortBy(RiceSpecies.COLD_TOLERANCE, reversed);
+        sortStatus.setText("Sorted by: Cold");
+        sortedBy = RiceSpecies.COLD_TOLERANCE;
+        resetButtonColor();
+        sortByCold.setBackground(getDrawable(R.drawable.selected_button_style));
+    }
+    private void salinitySort() {
+        if (!show_na)
+            myAdapter.filterRange(0, 10, RiceSpecies.SALINITY);
+        else
+            myAdapter.filterRange(-2, 10, RiceSpecies.SALINITY);
+
+        myAdapter.sortBy(RiceSpecies.SALINITY, reversed);
+        sortStatus.setText("Sorted by: Salinity");
+        sortedBy = RiceSpecies.SALINITY;
+        resetButtonColor();
+        sortBySalinity.setBackground(getDrawable(R.drawable.selected_button_style));
+    }
+    private void submergenceSort() {
+        if (!show_na)
+            myAdapter.filterRange(0, 10, RiceSpecies.SUBMERGENCE);
+        else
+            myAdapter.filterRange(-2, 10, RiceSpecies.SUBMERGENCE);
+        myAdapter.sortBy(RiceSpecies.SUBMERGENCE, reversed);
+        sortStatus.setText("Sorted by: Submergence");
+        resetButtonColor();
+        sortedBy = RiceSpecies.SUBMERGENCE;
+        sortBySubmergence.setBackground(getDrawable(R.drawable.selected_button_style));
     }
 
     private void initSliderRangeBar() {
         RangeBar rangeBar = findViewById(R.id.range_bar);
         rangeBar.setTickCount(10);
+        Log.i("TAG", "initSliderRangeBar: ");
         rangeBar.setOnRangeBarChangeListener(new RangeBar.OnRangeBarChangeListener() {
             @Override
             public void onIndexChangeListener(RangeBar rangeBar, int i, int i1) {
-                Log.i("TAG", "onIndexChangeListener: " + "Range " + i + " to " + i1);
+                Log.i("TAG", "onIndexChangeListener: " + "Range " + i + " to " + i1 + " Sorted by "+ sortedBy);
                 myAdapter.filterRange(i, i1, sortedBy);
                 sortBySorted();
             }
@@ -183,7 +248,16 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
     }
 
     private void sortBySorted() {
-        myAdapter.sortBy(sortedBy, reversed);
+        if (sortedBy == RiceSpecies.SUBMERGENCE)
+            submergenceSort();
+        if (sortedBy == RiceSpecies.SALINITY)
+            salinitySort();
+        if (sortedBy == RiceSpecies.COLD_TOLERANCE)
+            coldSort();
+        if (sortedBy == RiceSpecies.DROUGHT)
+            droughtSort();
+        if (sortedBy == RiceSpecies.ID)
+            myAdapter.sortBy(sortedBy, reversed);
     }
 
     public void resetButtonColor() {
@@ -200,7 +274,7 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
         getMenuInflater().inflate(R.menu.main_menu, menu);
         topMenu = menu;
         MenuItem item = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView)item.getActionView();
+        SearchView searchView = (SearchView) item.getActionView();
 
         MenuItem item2 = menu.findItem(R.id.action_open_bottom_sheet);
         item2.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -230,7 +304,7 @@ public class ListActivity extends AppCompatActivity implements MyAdapter.OnRiceC
     }
 
     @Override
-    public void onRiceClick( RiceSpecies riceSpecies) {
+    public void onRiceClick(RiceSpecies riceSpecies) {
         Intent intent = new Intent(this, RiceDetails.class);
         intent.putExtra("Rice", riceSpecies);
         startActivity(intent);

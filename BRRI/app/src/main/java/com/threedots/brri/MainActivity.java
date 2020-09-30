@@ -3,6 +3,7 @@ package com.threedots.brri;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -36,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         Log.i(TAG, "onCreate: " + LoginActivity.data.substring(0, 30));
-        Intent listIntent = new Intent(this, ListActivity.class);
-        startActivity(listIntent);
+        Intent menuIntent = new Intent(this, MenuActivity.class);
+        startActivity(menuIntent);
         finish();
 
     }
@@ -83,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+
 
     public String loadJSONFromAsset() {
         String json = null;
